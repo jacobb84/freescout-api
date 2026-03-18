@@ -38,10 +38,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/freescout-api"
-Documentation = "https://github.com/yourusername/freescout-api#readme"
-Repository = "https://github.com/yourusername/freescout-api"
-Issues = "https://github.com/yourusername/freescout-api/issues"
+Homepage = "https://github.com/jacobb84/freescout-api"
+Documentation = "https://github.com/jacobb84/freescout-api#readme"
+Repository = "https://github.com/jacobb84/freescout-api"
+Issues = "https://github.com/jacobb84/freescout-api/issues"
 
 [tool.setuptools.dynamic]
 version = {attr = "freescout._version.__version__"}

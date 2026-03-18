@@ -8,6 +8,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from freescout._version import __version__
 from freescout.exceptions import (
     AuthenticationError,
     ConflictError,
@@ -95,56 +96,37 @@ def handle_response(response: requests.Response) -> dict[str, Any] | None:
 
     message = error_data.get("message", "API error")
     errors = error_data.get("_embedded", {}).get("errors", [])
+    
+    # Common kwargs for all exceptions
+    common_kwargs = {
+        "message": message,
+        "status_code": status_code,
+        "response_data": error_data,
+        "request_url": response.request.url,
+        "request_method": response.request.method,
+        "response_text": response.text,
+        "response_headers": dict(response.headers),
+    }
 
     if status_code == 400:
         raise ValidationError(
-            message=message,
-            status_code=status_code,
-            response_data=error_data,
+            **common_kwargs,
             errors=errors,
         )
     elif status_code == 401:
-        raise AuthenticationError(
-            message=message,
-            status_code=status_code,
-            response_data=error_data,
-        )
+        raise AuthenticationError(**common_kwargs)
     elif status_code == 403:
-        raise ForbiddenError(
-            message=message,
-            status_code=status_code,
-            response_data=error_data,
-        )
+        raise ForbiddenError(**common_kwargs)
     elif status_code == 404:
-        raise NotFoundError(
-            message=message,
-            status_code=status_code,
-            response_data=error_data,
-        )
+        raise NotFoundError(**common_kwargs)
     elif status_code == 409:
-        raise ConflictError(
-            message=message,
-            status_code=status_code,
-            response_data=error_data,
-        )
+        raise ConflictError(**common_kwargs)
     elif status_code == 429:
-        raise RateLimitError(
-            message=message,
-            status_code=status_code,
-            response_data=error_data,
-        )
+        raise RateLimitError(**common_kwargs)
     elif status_code >= 500:
-        raise ServerError(
-            message=message,
-            status_code=status_code,
-            response_data=error_data,
-        )
+        raise ServerError(**common_kwargs)
     else:
-        raise FreeScoutError(
-            message=message,
-            status_code=status_code,
-            response_data=error_data,
-        )
+        raise FreeScoutError(**common_kwargs)
 
 
 class Paginator:
@@ -238,6 +220,7 @@ class Transport:
             "X-FreeScout-API-Key": self.api_key,
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "User-Agent": f"freescout-api-python/{__version__}",
         }
 
     def _build_url(self, endpoint: str) -> str:
