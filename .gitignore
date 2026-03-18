@@ -2,3 +2,4 @@ __pycache__
 .idea
 build
 freescout_api.egg-info
+/dist
